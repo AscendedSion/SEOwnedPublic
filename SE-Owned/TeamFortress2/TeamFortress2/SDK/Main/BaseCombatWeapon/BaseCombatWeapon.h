@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "../BaseEntity/BaseEntity.h"
@@ -6,29 +7,31 @@ class CBaseCombatWeapon : public CBaseEntity
 {
 public: //Netvars
 	M_DYNVARGET(Clip1, int, this, _("DT_BaseCombatWeapon"), _("LocalWeaponData"), _("m_iClip1"))
-	M_DYNVARGET(Clip2, int, this, _("DT_BaseCombatWeapon"), _("LocalWeaponData"), _("m_iClip2"))
-	M_DYNVARGET(ItemDefIndex, int, this, _("DT_EconEntity"), _("m_AttributeManager"), _("m_Item"), _("m_iItemDefinitionIndex"))
-	M_DYNVARGET(ChargeBeginTime, float, this, _("DT_WeaponPipebombLauncher"), _("PipebombLauncherLocalData"), _("m_flChargeBeginTime"))
-	M_DYNVARGET(ChargeDamage, float, this, _("DT_TFSniperRifle"), _("SniperRifleLocalData"), _("m_flChargedDamage"))
-	M_DYNVARGET(LastFireTime, float, this, _("DT_TFWeaponBase"), _("LocalActiveTFWeaponData"), _("m_flLastFireTime"))
-	M_DYNVARGET(NextSecondaryAttack, float, this, _("DT_BaseCombatWeapon"), _("LocalActiveWeaponData"), _("m_flNextSecondaryAttack"))
-	M_DYNVARGET(NextPrimaryAttack, float, this, _("DT_BaseCombatWeapon"), _("LocalActiveWeaponData"), _("m_flNextPrimaryAttack"))
+		M_DYNVARGET(Clip2, int, this, _("DT_BaseCombatWeapon"), _("LocalWeaponData"), _("m_iClip2"))
+		M_DYNVARGET(ItemDefIndex, int, this, _("DT_EconEntity"), _("m_AttributeManager"), _("m_Item"), _("m_iItemDefinitionIndex"))
+		M_DYNVARGET(ChargeBeginTime, float, this, _("DT_WeaponPipebombLauncher"), _("PipebombLauncherLocalData"), _("m_flChargeBeginTime"))
+		M_DYNVARGET(ChargeDamage, float, this, _("DT_TFSniperRifle"), _("SniperRifleLocalData"), _("m_flChargedDamage"))
+		M_DYNVARGET(LastFireTime, float, this, _("DT_TFWeaponBase"), _("LocalActiveTFWeaponData"), _("m_flLastFireTime"))
+		M_DYNVARGET(NextSecondaryAttack, float, this, _("DT_BaseCombatWeapon"), _("LocalActiveWeaponData"), _("m_flNextSecondaryAttack"))
+		M_DYNVARGET(NextPrimaryAttack, float, this, _("DT_BaseCombatWeapon"), _("LocalActiveWeaponData"), _("m_flNextPrimaryAttack"))
 
-	M_OFFSETGET(UberCharge, float, 0xC6C) //DT_WeaponMedigun -> NonLocalTFWeaponMedigundata -> m_flChargeLevel
-	//M_OFFSETGET(HealingTarget, int, 0xC48) //DT_WeaponMedigun -> m_hHealingTarget
-	M_OFFSETGET(Healing, int, 0xC51) //DT_WeaponMedigun -> m_bHealing
+		M_OFFSETGET(UberCharge, float, 0xC6C) //DT_WeaponMedigun -> NonLocalTFWeaponMedigundata -> m_flChargeLevel
+		//M_OFFSETGET(HealingTarget, int, 0xC48) //DT_WeaponMedigun -> m_hHealingTarget
+		M_OFFSETGET(Healing, int, 0xC51) //DT_WeaponMedigun -> m_bHealing
 
 public: //Virtuals
-	M_VIRTUALGET(WeaponID, int, this, int(__thiscall*)(void*), 377)
-	M_VIRTUALGET(Slot, int, this, int(__thiscall*)(void*), 327)
-	M_VIRTUALGET(DamageType, int, this, int(__thiscall*)(void*), 378)
-	M_VIRTUALGET(FinishReload, void, this, void(__thiscall*)(void*), 275)
-	M_VIRTUALGET(BulletSpread, Vec3&, this, Vec3&(__thiscall*)(void*), 286)
+	M_VIRTUALGET(WeaponID, int, this, int(__thiscall*)(void*), 381)
+		M_VIRTUALGET(Slot, int, this, int(__thiscall*)(void*), 330)
+		M_VIRTUALGET(DamageType, int, this, int(__thiscall*)(void*), 340)	// old one was 378, but comparing to fedoraware, it decreased???
+		M_VIRTUALGET(FinishReload, void, this, void(__thiscall*)(void*), 275)
+		M_VIRTUALGET(BulletSpread, Vec3&, this, Vec3& (__thiscall*)(void*), 286)
+		//M_VIRTUALGET(MuzzleAttachmenetFP, int, this, int(__thiscall*)(void*), 468)
+		//M_VIRTUALGET(MuzzleAttachmenetTP, int, this, int(__thiscall*)(void*), 469)
 
 public: //Everything else, lol
 	__inline float GetSmackTime() {
 		//credits to KGB
-		static auto dwOffset = g_NetVars.get_offset("DT_TFWeaponBase", "m_nInspectStage") + 0x1C;
+		static auto dwOffset = g_NetVars.get_offset(_("DT_TFWeaponBase"), _("m_nInspectStage")) + 0x1C;
 		return *reinterpret_cast<float*>(this + dwOffset);
 	}
 
@@ -40,6 +43,10 @@ public: //Everything else, lol
 	__inline void SetItemDefIndex(const int nIndex) {
 		static auto dwOff = g_NetVars.get_offset(_("DT_EconEntity"), _("m_AttributeManager"), _("m_Item"), _("m_iItemDefinitionIndex"));
 		*reinterpret_cast<int*>(this + dwOff) = nIndex;
+	}
+
+	__inline bool GetAttachment(int number, Vec3& origin) {
+		return GetVFunc<bool(__thiscall*)(void*, int, Vec3&)>(this, 71)(this, number, origin);
 	}
 
 	__inline CBaseEntity* GetHealingTarget() {
@@ -57,7 +64,7 @@ public: //Everything else, lol
 	}
 
 	__inline float GetSwingRange(CBaseEntity* pLocal) {
-		return static_cast<float>(GetVFunc<int(__thiscall*)(CBaseEntity*)>(this, 451)(pLocal));
+		return static_cast<float>(GetVFunc<int(__thiscall*)(CBaseEntity*)>(this, 455)(pLocal));
 	}
 
 	__inline float GetWeaponSpread() {
@@ -71,20 +78,20 @@ public: //Everything else, lol
 	}
 
 	__inline bool DoSwingTrace(CGameTrace& Trace) {
-		return GetVFunc<int(__thiscall*)(CGameTrace&)>(this, 453)(Trace);
+		return GetVFunc<int(__thiscall*)(CGameTrace&)>(this, 454)(Trace);
 	}
 
 	__inline bool CanFireCriticalShot(const bool bHeadShot) {
 		bool bResult = false;
 		if (const auto& pOwner = g_Interfaces.EntityList->GetClientEntityFromHandle(GethOwner())) {
 			const int nOldFov = pOwner->GetFov(); pOwner->SetFov(70);
-			bResult = GetVFunc<bool(__thiscall*)(decltype(this), bool, CBaseEntity*)>(this, 421)(this, bHeadShot, nullptr);
+			bResult = GetVFunc<bool(__thiscall*)(decltype(this), bool, CBaseEntity*)>(this, 425)(this, bHeadShot, nullptr);
 			pOwner->SetFov(nOldFov);
 		} return bResult;
 	}
 
 	__inline bool CanFireRandomCriticalShot(const float flCritChance) {
-		return GetVFunc<bool(__thiscall*)(decltype(this), float)>(this, 422)(this, flCritChance);
+		return GetVFunc<bool(__thiscall*)(decltype(this), float)>(this, 424)(this, flCritChance);
 	}
 
 	__inline bool CanWeaponHeadShot() {
@@ -169,6 +176,6 @@ public: //Everything else, lol
 	}
 
 	__inline int GetMinigunState() {
-		return *reinterpret_cast<int *>(this + 0xC48);
+		return *reinterpret_cast<int*>(this + 0xC48);
 	}
 };
